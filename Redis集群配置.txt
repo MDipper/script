@@ -1,0 +1,100 @@
+1.下载Redis源码包
+wget -P /home http://download.redis.io/releases/redis-5.0.3.tar.gz
+tar xf /home/redis-5.0.3.tar.gz -C /home/
+cd /home/redis-5.0.3
+mkdir /datas/soft -pv
+mkdir /datas/log/redis-5.0.3 -pv
+
+#安装
+yum -y install make gcc gcc-c++ tcl-devel
+make install PREFIX=/datas/soft/redis-5.0.3 MALLOC=libc
+
+#加入系统变量
+vim /etc/profile
+export PATH=$PATH:/datas/soft/redis-5.0.3/bin/
+
+source /etc/profile
+
+#创建多实例redis
+mkdir /etc/redis/
+cp -r /home/redis-5.0.3/*.conf /etc/redis/
+cp /etc/redis/redis.conf /etc/redis/redis01.conf
+
+#修改redis配置文件
+vim /etc/redis/redis01.conf
+:%s#logfile ""#logfile "/datas/log/redis-5.0.3/redis_6379.log"#
+:%s/appendonly no/appendonly yes/			#开启持久化（AOF），以日志的形式来记录每个写操作，将Redis执行过的所有写指令记录下来(读操作不记录)，只许追加文件但不可以改写文件
+:%s/daemonize no/daemonize yes/				#开启进程守护模式（后台运行）
+:%s/# cluster-config-file/cluster-config-file/		#开启自定义修改node文件名，单机多实例必须开启
+:%s/^bind 127.0.0.1$/bind 127.0.0.1 192.168.1.254/
+:%s/# cluster-enabled yes/cluster-enabled yes/		##开启cluster，集群化	
+:%s/6379/7001/g			#端口号依次为：7001,7002,7003,7004,7005,7006
+
+#replica-priority 100		#节点优先级，数字越小优先级越高，配置成0，永远不会被选举，当master宕机后，优先级高的slave当选master
+
+#复制配置文件再次修改
+cp /etc/redis/redis01.conf /etc/redis/redis02.conf
+cp /etc/redis/redis01.conf /etc/redis/redis03.conf
+cp /etc/redis/redis01.conf /etc/redis/redis04.conf
+cp /etc/redis/redis01.conf /etc/redis/redis05.conf
+cp /etc/redis/redis01.conf /etc/redis/redis06.conf
+
+#修改其他配置端口号
+:%s/7001/700x/g
+
+#启动redis实例
+redis-server /etc/redis/redis01.conf
+redis-server /etc/redis/redis02.conf
+redis-server /etc/redis/redis03.conf
+redis-server /etc/redis/redis04.conf
+redis-server /etc/redis/redis05.conf
+redis-server /etc/redis/redis06.conf
+
+#关闭redis实例
+redis-cli -p 7001 shutdown
+redis-cli -p 7002 shutdown
+redis-cli -p 7003 shutdown
+redis-cli -p 7004 shutdown
+redis-cli -p 7005 shutdown
+redis-cli -p 7006 shutdown
+
+#警告处理
+# WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+
+#暂时解决
+echo 1024 > /proc/sys/net/core/somaxconn
+
+#永久解决
+vim /etc/rc.local
+echo 1024 > /proc/sys/net/core/somaxconn
+
+# WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.
+
+#暂时解决
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
+#永久解决
+vim /etc/rc.local
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
+# WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+
+#永久解决（加入配置）
+vim /etc/sysctl.conf
+vm.overcommit_memory = 1
+
+sysctl -p
+
+#放行端口
+iptables -I INPUT -p tcp -m multiport --dport 7001:7006 -j ACCEPT
+service iptables save
+
+#连接redis集群
+redis-cli -h 192.168.1.254 -p 7001 -c
+
+#查看信息
+CLUSTER INFO
+CLUSTER NODES
+
+#压力测试
+redis-benchmark -h 192.168.1.254 -p 7001 -c 500 -n 1000 -q
