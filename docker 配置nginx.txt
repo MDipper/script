@@ -1,0 +1,9 @@
+
+docker run \
+--name centos_nginx \
+-d -p 80:80 \
+-v /home/nginx/html:/usr/share/nginx/html \
+-v /home/nginx/log:/var/log/nginx \
+-v /home/nginx/nginx.conf:/usr/local/nginx/nginx.conf:ro \
+-v /home/nginx/conf.d:/usr/local/nginx/conf.d \
+nginx
