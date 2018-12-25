@@ -1,48 +1,66 @@
-1.ÏÂÔØRedisÔ´Âë°ü
+1.ä¸‹è½½Redisæºç åŒ…
 wget -P /home http://download.redis.io/releases/redis-5.0.3.tar.gz
 tar xf /home/redis-5.0.3.tar.gz -C /home/
 cd /home/redis-5.0.3
 mkdir /datas/soft -pv
 mkdir /datas/log/redis-5.0.3 -pv
 
-#°²×°
+#å®‰è£…
 yum -y install make gcc gcc-c++ tcl-devel
 make install PREFIX=/datas/soft/redis-5.0.3 MALLOC=libc
 
-#¼ÓÈëÏµÍ³±äÁ¿
+#åŠ å…¥ç³»ç»Ÿå˜é‡
 vim /etc/profile
 export PATH=$PATH:/datas/soft/redis-5.0.3/bin/
 
 source /etc/profile
 
-#´´½¨¶àÊµÀıredis
+#åˆ›å»ºå¤šå®ä¾‹redis
 mkdir /etc/redis/
 cp -r /home/redis-5.0.3/*.conf /etc/redis/
 cp /etc/redis/redis.conf /etc/redis/redis01.conf
 
-#ĞŞ¸ÄredisÅäÖÃÎÄ¼ş
+#ä¿®æ”¹redisé…ç½®æ–‡ä»¶â€”â€”æ–¹æ³•1
 vim /etc/redis/redis01.conf
 :%s#logfile ""#logfile "/datas/log/redis-5.0.3/redis_6379.log"#
-:%s/appendonly no/appendonly yes/			#¿ªÆô³Ö¾Ã»¯£¨AOF£©£¬ÒÔÈÕÖ¾µÄĞÎÊ½À´¼ÇÂ¼Ã¿¸öĞ´²Ù×÷£¬½«RedisÖ´ĞĞ¹ıµÄËùÓĞĞ´Ö¸Áî¼ÇÂ¼ÏÂÀ´(¶Á²Ù×÷²»¼ÇÂ¼)£¬Ö»Ğí×·¼ÓÎÄ¼şµ«²»¿ÉÒÔ¸ÄĞ´ÎÄ¼ş
-:%s/daemonize no/daemonize yes/				#¿ªÆô½ø³ÌÊØ»¤Ä£Ê½£¨ºóÌ¨ÔËĞĞ£©
-:%s/# cluster-config-file/cluster-config-file/		#¿ªÆô×Ô¶¨ÒåĞŞ¸ÄnodeÎÄ¼şÃû£¬µ¥»ú¶àÊµÀı±ØĞë¿ªÆô
+:%s/appendonly no/appendonly yes/			#å¼€å¯æŒä¹…åŒ–ï¼ˆAOFï¼‰ï¼Œä»¥æ—¥å¿—çš„å½¢å¼æ¥è®°å½•æ¯ä¸ªå†™æ“ä½œï¼Œå°†Redisæ‰§è¡Œè¿‡çš„æ‰€æœ‰å†™æŒ‡ä»¤è®°å½•ä¸‹æ¥(è¯»æ“ä½œä¸è®°å½•)ï¼Œåªè®¸è¿½åŠ æ–‡ä»¶ä½†ä¸å¯ä»¥æ”¹å†™æ–‡ä»¶
+:%s/daemonize no/daemonize yes/				#å¼€å¯è¿›ç¨‹å®ˆæŠ¤æ¨¡å¼ï¼ˆåå°è¿è¡Œï¼‰
+:%s/# cluster-config-file/cluster-config-file/		#å¼€å¯è‡ªå®šä¹‰ä¿®æ”¹nodeæ–‡ä»¶åï¼Œå•æœºå¤šå®ä¾‹å¿…é¡»å¼€å¯
 :%s/^bind 127.0.0.1$/bind 127.0.0.1 192.168.1.254/
-:%s/# cluster-enabled yes/cluster-enabled yes/		##¿ªÆôcluster£¬¼¯Èº»¯	
-:%s/6379/7001/g			#¶Ë¿ÚºÅÒÀ´ÎÎª£º7001,7002,7003,7004,7005,7006
+:%s/# cluster-enabled yes/cluster-enabled yes/		##å¼€å¯clusterï¼Œé›†ç¾¤åŒ–	
+:%s/6379/7001/g			#ç«¯å£å·ä¾æ¬¡ä¸ºï¼š7001,7002,7003,7004,7005,7006
 
-#replica-priority 100		#½ÚµãÓÅÏÈ¼¶£¬Êı×ÖÔ½Ğ¡ÓÅÏÈ¼¶Ô½¸ß£¬ÅäÖÃ³É0£¬ÓÀÔ¶²»»á±»Ñ¡¾Ù£¬µ±masterå´»úºó£¬ÓÅÏÈ¼¶¸ßµÄslaveµ±Ñ¡master
+#ä¿®æ”¹redisé…ç½®æ–‡ä»¶â€”â€”æ–¹æ³•2
+sed -i "s#logfile ""#logfile "/datas/log/"$RedisVersion"/redis_6379.log"#"  /etc/redis/redis01.conf
+sed -i 's/appendonly no/appendonly yes/' /etc/redis/redis01.conf                   #å¼€å¯æŒä¹…åŒ–ï¼ˆAOFï¼‰ï¼Œä»¥æ—¥å¿—çš„å½¢å¼æ¥è®°å½•æ¯ä¸ªå†™æ“ä½œï¼Œå°†Redisæ‰§è¡Œè¿‡çš„æ‰€æœ‰å†™æŒ‡ä»¤è®°å½•ä¸‹æ¥(è¯»æ“ä½œä¸è®°å½•)ï¼Œåªè®¸è¿½åŠ æ–‡ä»¶ä½†ä¸å¯ä»¥æ”¹å†™æ–‡ä»¶
+sed -i 's/daemonize no/daemonize yes/'	 /etc/redis/redis01.conf			       #å¼€å¯è¿›ç¨‹å®ˆæŠ¤æ¨¡å¼ï¼ˆåå°è¿è¡Œï¼‰
+sed -i 's/# cluster-config-file/cluster-config-file/' /etc/redis/redis01.conf      #å¼€å¯è‡ªå®šä¹‰ä¿®æ”¹nodeæ–‡ä»¶åï¼Œå•æœºå¤šå®ä¾‹å¿…é¡»å¼€å¯
+sed -i 's/^bind 127.0.0.1$/bind 127.0.0.1 192.168.1.254/' /etc/redis/redis01.conf
+sed -i 's/# cluster-enabled yes/cluster-enabled yes/' /etc/redis/redis01.conf      ##å¼€å¯clusterï¼Œé›†ç¾¤åŒ–
+sed -i 's/6379/7001/g' /etc/redis/redis01.conf                                     #ç«¯å£å·ä¾æ¬¡ä¸ºï¼š7001,7002,7003,7004,7005,7006
 
-#¸´ÖÆÅäÖÃÎÄ¼şÔÙ´ÎĞŞ¸Ä
+
+
+#replica-priority 100		#èŠ‚ç‚¹ä¼˜å…ˆçº§ï¼Œæ•°å­—è¶Šå°ä¼˜å…ˆçº§è¶Šé«˜ï¼Œé…ç½®æˆ0ï¼Œæ°¸è¿œä¸ä¼šè¢«é€‰ä¸¾ï¼Œå½“masterå®•æœºåï¼Œä¼˜å…ˆçº§é«˜çš„slaveå½“é€‰master
+
+#å¤åˆ¶é…ç½®æ–‡ä»¶å†æ¬¡ä¿®æ”¹
 cp /etc/redis/redis01.conf /etc/redis/redis02.conf
 cp /etc/redis/redis01.conf /etc/redis/redis03.conf
 cp /etc/redis/redis01.conf /etc/redis/redis04.conf
 cp /etc/redis/redis01.conf /etc/redis/redis05.conf
 cp /etc/redis/redis01.conf /etc/redis/redis06.conf
 
-#ĞŞ¸ÄÆäËûÅäÖÃ¶Ë¿ÚºÅ
+#ä¿®æ”¹å…¶ä»–é…ç½®ç«¯å£å·â€”â€”æ–¹æ³•1
 :%s/7001/700x/g
 
-#Æô¶¯redisÊµÀı
+#ä¿®æ”¹å…¶ä»–é…ç½®ç«¯å£å·â€”â€”æ–¹æ³•2
+sed -i 's/7001/7002/g' /etc/redis/redis02.conf
+sed -i 's/7001/7003/g' /etc/redis/redis03.conf
+sed -i 's/7001/7004/g' /etc/redis/redis04.conf
+sed -i 's/7001/7005/g' /etc/redis/redis05.conf
+sed -i 's/7001/7006/g' /etc/redis/redis06.conf
+
+#å¯åŠ¨rediså®ä¾‹
 redis-server /etc/redis/redis01.conf
 redis-server /etc/redis/redis02.conf
 redis-server /etc/redis/redis03.conf
@@ -50,7 +68,7 @@ redis-server /etc/redis/redis04.conf
 redis-server /etc/redis/redis05.conf
 redis-server /etc/redis/redis06.conf
 
-#¹Ø±ÕredisÊµÀı
+#å…³é—­rediså®ä¾‹
 redis-cli -p 7001 shutdown
 redis-cli -p 7002 shutdown
 redis-cli -p 7003 shutdown
@@ -58,43 +76,43 @@ redis-cli -p 7004 shutdown
 redis-cli -p 7005 shutdown
 redis-cli -p 7006 shutdown
 
-#¾¯¸æ´¦Àí
+#è­¦å‘Šå¤„ç†
 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
 
-#ÔİÊ±½â¾ö
+#æš‚æ—¶è§£å†³
 echo 1024 > /proc/sys/net/core/somaxconn
 
-#ÓÀ¾Ã½â¾ö
+#æ°¸ä¹…è§£å†³
 vim /etc/rc.local
 echo 1024 > /proc/sys/net/core/somaxconn
 
 # WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.
 
-#ÔİÊ±½â¾ö
+#æš‚æ—¶è§£å†³
 echo never > /sys/kernel/mm/transparent_hugepage/enabled
 
-#ÓÀ¾Ã½â¾ö
+#æ°¸ä¹…è§£å†³
 vim /etc/rc.local
 echo never > /sys/kernel/mm/transparent_hugepage/enabled
 
 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
 
-#ÓÀ¾Ã½â¾ö£¨¼ÓÈëÅäÖÃ£©
+#æ°¸ä¹…è§£å†³ï¼ˆåŠ å…¥é…ç½®ï¼‰
 vim /etc/sysctl.conf
 vm.overcommit_memory = 1
 
 sysctl -p
 
-#·ÅĞĞ¶Ë¿Ú
+#æ”¾è¡Œç«¯å£
 iptables -I INPUT -p tcp -m multiport --dport 7001:7006 -j ACCEPT
 service iptables save
 
-#Á¬½Óredis¼¯Èº
+#è¿æ¥redisé›†ç¾¤
 redis-cli -h 192.168.1.254 -p 7001 -c
 
-#²é¿´ĞÅÏ¢
+#æŸ¥çœ‹ä¿¡æ¯
 CLUSTER INFO
 CLUSTER NODES
 
-#Ñ¹Á¦²âÊÔ
+#å‹åŠ›æµ‹è¯•
 redis-benchmark -h 192.168.1.254 -p 7001 -c 500 -n 1000 -q
