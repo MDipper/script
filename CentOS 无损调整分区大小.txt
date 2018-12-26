@@ -1,0 +1,92 @@
+##  CentOS Linux如何无损调整分区大小(EXT4文件系统)    ##
+
+##挂载硬盘
+
+#1.将20G的硬盘分为两个区
+fdisk /dev/sdb
+
+命令操作
+   a   toggle a bootable flag
+   b   edit bsd disklabel
+   c   toggle the dos compatibility flag
+   d   delete a partition
+   g   create a new empty GPT partition table
+   G   create an IRIX (SGI) partition table
+   l   list known partition types
+   m   print this menu
+   n   add a new partition
+   o   create a new empty DOS partition table
+   p   print the partition table
+   q   quit without saving changes
+   s   create a new empty Sun disklabel
+   t   change a partition's system id
+   u   change display/entry units
+   v   verify the partition table
+   w   write table to disk and exit
+   x   extra functionality (experts only)
+操作步骤
+    m(print this menu)
+    p(print the partition table)
+创建第一个分区
+    n(add a new partition)  
+    ......p(primary partition)
+    ......1(Partition number)
+    ......Enter(First cylinder)    
+    ......20973567或+10G(Last cylinder)
+创建第二个分区
+    n(add a new partition)  
+    ......p(primary partition)
+    ......2(Partition number)
+    ......Enter(First cylinder)    
+    ......Enter(Last cylinder)
+保存分区配置
+    w(write table to disk and exit)
+
+#2.将两个分区全部转换成Physical volume（物理卷PV)
+pvcreate /dev/sdb{1,2}   
+pvs
+
+#3.Physical volume(物理卷PV)转换成Volume group(卷组 VG)并且取名sdbvg
+vgcreate  sdbvg /dev/sdb{1,2}
+vgs
+
+#4.划分两个10G的逻辑卷并且分别取名为sdblv1和sdblv2
+lvcreate sdbvg -L 10G -n sdblv1   #把10G分配给sdbkv1
+lvcreate sdbvg -L 9G -n sdblv2    #把9G分配给sdbkv2
+lvextenf -l +100%free /dev/sdbvg/sdblv2 #把闲置空间挂在到sdblv2
+lvs
+
+#5.格式化新的两个逻辑分区为ext4                   
+mke2fs -t ext4 /dev/sdbvg/sdblv1
+mke2fs -t ext4 /dev/sdbvg/sdblv2
+
+#6.挂载/data1和/data2
+echo  '/dev/sdbvg/sdblv1  /data1  ext4 defaults 0 0' >>   /etc/fstab
+echo  '/dev/sdbvg/sdblv2  /data2  ext4 defaults 0 0' >>   /etc/fstab
+mount  -a
+df -h
+
+
+
+##调整分区大小，把/data1的5个G分给/data2
+
+#1.查看磁盘使用情况
+df -h
+
+#2.卸载/data1
+umount  /data1
+
+#3.调整分区大小
+e2fsck -f  /dev/mapper/sdbvg-sdblv1
+resize2fs  /dev/mapper/sdbvg-sdblv1  5G
+mount /dev/mapper/sdbvg-sdblv1  /data1   #重新挂载/data1
+df -h
+
+#4.设置/data1的空间为5G,/data1的数据大小必须小于5G,注意提示
+lvreduce  -L 5G   /dev/mapper/sdbvg-sdblv1
+                                   
+#5.把空出来的5G分配给/data2
+lvextend -l +100%free  /dev/mapper/sdbvg-sdblv2
+e2fsck -f  /dev/mapper/sdbvg-sdblv2
+resize2fs  -p  /dev/mapper/sdbvg-sdblv2   #调整/data2分区大小
+df -h
