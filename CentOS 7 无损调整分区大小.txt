@@ -1,11 +1,11 @@
-##  CentOS LinuxÈçºÎÎŞËğµ÷Õû·ÖÇø´óĞ¡(EXT4ÎÄ¼şÏµÍ³)    ##
+##  CentOS Linuxå¦‚ä½•æ— æŸè°ƒæ•´åˆ†åŒºå¤§å°(EXT4æ–‡ä»¶ç³»ç»Ÿ)    ##
 
-##¹ÒÔØÓ²ÅÌ
+##æŒ‚è½½ç¡¬ç›˜
 
-#1.½«20GµÄÓ²ÅÌ·ÖÎªÁ½¸öÇø
+#1.å°†20Gçš„ç¡¬ç›˜åˆ†ä¸ºä¸¤ä¸ªåŒº
 fdisk /dev/sdb
 
-ÃüÁî²Ù×÷
+å‘½ä»¤æ“ä½œ
    a   toggle a bootable flag
    b   edit bsd disklabel
    c   toggle the dos compatibility flag
@@ -24,43 +24,43 @@ fdisk /dev/sdb
    v   verify the partition table
    w   write table to disk and exit
    x   extra functionality (experts only)
-²Ù×÷²½Öè
+æ“ä½œæ­¥éª¤
     m(print this menu)
     p(print the partition table)
-´´½¨µÚÒ»¸ö·ÖÇø
+åˆ›å»ºç¬¬ä¸€ä¸ªåˆ†åŒº
     n(add a new partition)  
     ......p(primary partition)
     ......1(Partition number)
     ......Enter(First cylinder)    
-    ......20973567»ò+10G(Last cylinder)
-´´½¨µÚ¶ş¸ö·ÖÇø
+    ......20973567æˆ–+10G(Last cylinder)
+åˆ›å»ºç¬¬äºŒä¸ªåˆ†åŒº
     n(add a new partition)  
     ......p(primary partition)
     ......2(Partition number)
     ......Enter(First cylinder)    
     ......Enter(Last cylinder)
-±£´æ·ÖÇøÅäÖÃ
+ä¿å­˜åˆ†åŒºé…ç½®
     w(write table to disk and exit)
 
-#2.½«Á½¸ö·ÖÇøÈ«²¿×ª»»³ÉPhysical volume£¨ÎïÀí¾íPV)
+#2.å°†ä¸¤ä¸ªåˆ†åŒºå…¨éƒ¨è½¬æ¢æˆPhysical volumeï¼ˆç‰©ç†å·PV)
 pvcreate /dev/sdb{1,2}   
 pvs
 
-#3.Physical volume(ÎïÀí¾íPV)×ª»»³ÉVolume group(¾í×é VG)²¢ÇÒÈ¡Ãûsdbvg
+#3.Physical volume(ç‰©ç†å·PV)è½¬æ¢æˆVolume group(å·ç»„ VG)å¹¶ä¸”å–åsdbvg
 vgcreate  sdbvg /dev/sdb{1,2}
 vgs
 
-#4.»®·ÖÁ½¸ö10GµÄÂß¼­¾í²¢ÇÒ·Ö±ğÈ¡ÃûÎªsdblv1ºÍsdblv2
-lvcreate sdbvg -L 10G -n sdblv1   #°Ñ10G·ÖÅä¸øsdbkv1
-lvcreate sdbvg -L 9G -n sdblv2    #°Ñ9G·ÖÅä¸øsdbkv2
-lvextenf -l +100%free /dev/sdbvg/sdblv2 #°ÑÏĞÖÃ¿Õ¼ä¹ÒÔÚµ½sdblv2
+#4.åˆ’åˆ†ä¸¤ä¸ª10Gçš„é€»è¾‘å·å¹¶ä¸”åˆ†åˆ«å–åä¸ºsdblv1å’Œsdblv2
+lvcreate sdbvg -L 10G -n sdblv1   #æŠŠ10Gåˆ†é…ç»™sdbkv1
+lvcreate sdbvg -L 9G -n sdblv2    #æŠŠ9Gåˆ†é…ç»™sdbkv2
+lvextenf -l +100%free /dev/sdbvg/sdblv2 #æŠŠé—²ç½®ç©ºé—´æŒ‚åœ¨åˆ°sdblv2
 lvs
 
-#5.¸ñÊ½»¯ĞÂµÄÁ½¸öÂß¼­·ÖÇøÎªext4                   
+#5.æ ¼å¼åŒ–æ–°çš„ä¸¤ä¸ªé€»è¾‘åˆ†åŒºä¸ºext4                   
 mke2fs -t ext4 /dev/sdbvg/sdblv1
 mke2fs -t ext4 /dev/sdbvg/sdblv2
 
-#6.¹ÒÔØ/data1ºÍ/data2
+#6.æŒ‚è½½/data1å’Œ/data2
 echo  '/dev/sdbvg/sdblv1  /data1  ext4 defaults 0 0' >>   /etc/fstab
 echo  '/dev/sdbvg/sdblv2  /data2  ext4 defaults 0 0' >>   /etc/fstab
 mount  -a
@@ -68,25 +68,25 @@ df -h
 
 
 
-##µ÷Õû·ÖÇø´óĞ¡£¬°Ñ/data1µÄ5¸öG·Ö¸ø/data2
+##è°ƒæ•´åˆ†åŒºå¤§å°ï¼ŒæŠŠ/data1çš„5ä¸ªGåˆ†ç»™/data2
 
-#1.²é¿´´ÅÅÌÊ¹ÓÃÇé¿ö
+#1.æŸ¥çœ‹ç£ç›˜ä½¿ç”¨æƒ…å†µ
 df -h
 
-#2.Ğ¶ÔØ/data1
+#2.å¸è½½/data1
 umount  /data1
 
-#3.µ÷Õû·ÖÇø´óĞ¡
+#3.è°ƒæ•´åˆ†åŒºå¤§å°
 e2fsck -f  /dev/mapper/sdbvg-sdblv1
 resize2fs  /dev/mapper/sdbvg-sdblv1  5G
-mount /dev/mapper/sdbvg-sdblv1  /data1   #ÖØĞÂ¹ÒÔØ/data1
+mount /dev/mapper/sdbvg-sdblv1  /data1   #é‡æ–°æŒ‚è½½/data1
 df -h
 
-#4.ÉèÖÃ/data1µÄ¿Õ¼äÎª5G,/data1µÄÊı¾İ´óĞ¡±ØĞëĞ¡ÓÚ5G,×¢ÒâÌáÊ¾
+#4.è®¾ç½®/data1çš„ç©ºé—´ä¸º5G,/data1çš„æ•°æ®å¤§å°å¿…é¡»å°äº5G,æ³¨æ„æç¤º
 lvreduce  -L 5G   /dev/mapper/sdbvg-sdblv1
                                    
-#5.°Ñ¿Õ³öÀ´µÄ5G·ÖÅä¸ø/data2
+#5.æŠŠç©ºå‡ºæ¥çš„5Gåˆ†é…ç»™/data2
 lvextend -l +100%free  /dev/mapper/sdbvg-sdblv2
 e2fsck -f  /dev/mapper/sdbvg-sdblv2
-resize2fs  -p  /dev/mapper/sdbvg-sdblv2   #µ÷Õû/data2·ÖÇø´óĞ¡
+resize2fs  -p  /dev/mapper/sdbvg-sdblv2   #è°ƒæ•´/data2åˆ†åŒºå¤§å°
 df -h
